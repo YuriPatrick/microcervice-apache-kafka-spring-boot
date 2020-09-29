@@ -1,0 +1,1 @@
+http://localhost:8087/v1/product/48010d36-3b81-4868-be24-a25bb0575156
