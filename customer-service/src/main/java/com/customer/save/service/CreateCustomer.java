@@ -13,6 +13,7 @@ import com.customer.save.service.gateway.json.CustomerJson;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 /*
+ * CLASS OF SERVICE RESPONSIBLE FOR RECEIVING THE TOPICO SENT API
  * CLASSE DE SERVIÇO RESPONSÁVEL PELO RECEBIMENTO DO TOPICO ENVIADO PELA API
  */
 @Service

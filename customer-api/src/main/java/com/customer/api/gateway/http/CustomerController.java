@@ -1,5 +1,6 @@
 package com.customer.api.gateway.http;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import com.customer.api.service.SaveCustomerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 /*
+ * API RESPONSIBLE FOR EXECUTING THE APPLICATION AND SENDING THE TOPICO
  * API RESPONSÁVEL PELA EXECUÇÃO DA APLICAÇÃO E O ENVIO DO TOPICO
  */
 @RestController
@@ -23,9 +25,12 @@ public class CustomerController {
 	private SaveCustomerService saveCustomerService;
 
 	@PostMapping("/")
-	public String create(@RequestBody CustomerJson customerJson)
+	public String create(@RequestBody CustomerJson customerJson, Optional<Object> object)
 			throws JsonProcessingException, InterruptedException, ExecutionException {
+		
+		//throw new NumberFormatException();
+		
 		return saveCustomerService.execute(customerJson);
+		
 	}
-	
 }

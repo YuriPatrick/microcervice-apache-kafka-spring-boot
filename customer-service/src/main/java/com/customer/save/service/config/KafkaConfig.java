@@ -21,76 +21,76 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
-/*
- * CLASSE DE CONFIGURAÇÃO DO CONSUMER E PRODUCER DO KAFKA("request e requestreply")
+
+/**
+ * KAFKA CONSUMER AND PRODUCER CONFIGURATION CLASS
  */
 @Configuration
 public class KafkaConfig {
 
-    @Value("${kafka.bootstrap-servers}")
-    private String bootstrapServers;
+	@Value("${kafka.bootstrap-servers}")
+	private String bootstrapServers;
 
-    @Value("${kafka.topic.requestreply-topic}")
-    private String requestReplyTopic;
+	@Value("${kafka.topic.requestreply-topic}")
+	private String requestReplyTopic;
 
-    @Value("${kafka.consumergroup}")
-    private String consumerGroup;
+	@Value("${kafka.consumergroup}")
+	private String consumerGroup;
 
-    @Bean
-    public Map<String, Object> producerConfigs() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                bootstrapServers);
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-                StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        return props;
-    }
-
-    @Bean
-    public Map<String, Object> consumerConfigs() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, consumerGroup);
-        return props;
-    }
-
-    @Bean
-    public ProducerFactory<String, String> producerFactory() {
-        return new DefaultKafkaProducerFactory<>(producerConfigs());
-    }
-
-    @Bean
-    public KafkaTemplate<String, String> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
-    }
-        
-    @Bean
-	public ReplyingKafkaTemplate<String, String, String> replyKafkaTemplate(ProducerFactory<String, String> pf,
-	    KafkaMessageListenerContainer<String, String> container) {
-	ReplyingKafkaTemplate<String, String, String> replyTemplate = new ReplyingKafkaTemplate<>(pf, container);
-	//replyTemplate.setReplyTimeout(30000L);
-	replyTemplate.setSharedReplyTopic(true);
-	return replyTemplate;
+	@Bean
+	public Map<String, Object> producerConfigs() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+		return props;
 	}
 
-    @Bean
-    public KafkaMessageListenerContainer<String, String> replyContainer(ConsumerFactory<String, String> cf) {
-        ContainerProperties containerProperties = new ContainerProperties(requestReplyTopic);
-        return new KafkaMessageListenerContainer<>(cf, containerProperties);
-    }
+	@Bean
+	public Map<String, Object> consumerConfigs() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+		props.put(ConsumerConfig.GROUP_ID_CONFIG, consumerGroup);
+		props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+		props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "60000");
+		return props;
+	}
 
-    @Bean
-    public ConsumerFactory<String, String> consumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(), new StringDeserializer());
-    }
+	@Bean
+	public ProducerFactory<String, String> producerFactory() {
+		return new DefaultKafkaProducerFactory<>(producerConfigs());
+	}
 
-    @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
-        factory.setReplyTemplate(kafkaTemplate());
-        return factory;
-    }
+	@Bean
+	public KafkaTemplate<String, String> kafkaTemplate() {
+		return new KafkaTemplate<>(producerFactory());
+	}
 
+	@Bean
+	public ReplyingKafkaTemplate<String, String, String> replyKafkaTemplate(ProducerFactory<String, String> pf,
+			KafkaMessageListenerContainer<String, String> container) {
+		ReplyingKafkaTemplate<String, String, String> replyTemplate = new ReplyingKafkaTemplate<>(pf, container);
+		replyTemplate.setSharedReplyTopic(true);
+		return replyTemplate;
+	}
+
+	@Bean
+	public KafkaMessageListenerContainer<String, String> replyContainer(ConsumerFactory<String, String> cf) {
+		ContainerProperties containerProperties = new ContainerProperties(requestReplyTopic);
+		return new KafkaMessageListenerContainer<>(cf, containerProperties);
+	}
+
+	@Bean
+	public ConsumerFactory<String, String> consumerFactory() {
+		return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(), new StringDeserializer());
+	}
+
+	@Bean
+	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
+		ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+		factory.setConsumerFactory(consumerFactory());
+		factory.setReplyTemplate(kafkaTemplate());
+		factory.setErrorHandler(new KafkaErrorHandler());
+		return factory;
+	}
 }

@@ -55,6 +55,5 @@ public class SaveCustomerService {
 		CustomerJson customerJsonReturn = mapper.readValue(consumerRecord.value(), CustomerJson.class);
 
 		return customerJsonReturn.toString();
-
 	}
 }

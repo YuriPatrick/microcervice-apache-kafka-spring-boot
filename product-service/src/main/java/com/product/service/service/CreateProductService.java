@@ -17,9 +17,11 @@ public class CreateProductService {
 	private ProductRepository productRepository;
 
 	public UUID execute(Product product) {
-		product.setId(UUID.randomUUID());
-		productRepository.save(product);
-		return product.getId();
+		
+		throw new RuntimeException("test KafkaErrorHandler");
+		//product.setId(UUID.randomUUID());
+		//productRepository.save(product);
+		//return product.getId();
 	}
 
 	/*
